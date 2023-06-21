@@ -52,13 +52,10 @@ One of the variables in the dataset is `revolutions`, the number of revolutions,
 ```{r}
 library(modelsummary); library(tidyverse)
 
-GrowthSW$treat <- ifelse(GrowthSW$revolutions == 0, 0, 1)
+GrowthSW$treat <- ifelse(GrowthSW$revolutions == 0, "Revolutions equal to 0", "More than 0 revolutions")
 
-datasummary(growth + rgdp60 ~ Mean + Median + SD + Min + Max,
-            data = GrowthSW[GrowthSW$treat == 0, ])
+datasummary(growth + rgdp60 ~ treat*(Mean + Median + SD + Min + Max), data = GrowthSW)
 
-datasummary(growth + rgdp60 ~ Mean + Median + SD + Min + Max,
-            data = GrowthSW[GrowthSW$treat == 1, ])
 
 ```
 
@@ -74,11 +71,13 @@ In question 2, we have seen that growth rates differ markedly between countries 
 
 ```{r}
 # write t test here
+t.test(growth ~ treat, data = GrowthSW)
 
 ```
 
 **Question 3.2**: What is the $p$-value of the test, and what does that mean? Write down your answer below.
 
+The p-value of the test is 0.06871, indicating that we do not have strong evidence to reject the null hypothesis on 95 percent confidence interval. This suggests that there may not be a significant difference in the mean growth rates between the two groups of countries (with and without revolutions), although further analysis may be applied.
 
 We can also control for other factors by including them in a linear model, for example:
 
@@ -88,6 +87,7 @@ $$
 
 **Question 3.3**: What do you think the purpose of including the variable `rgdp60` is? Look at `?GrowthSW` to find out what the variables mean. 
 
+RGDP60 is the value of GDP per capita in 1960, converted to 1960 U.S. dollars. We must consider it too, since the increase in GDP for a country with a smaller absolute value per capita is expected to be simpler than for a country with a larger one.
 
 We now want to estimate a stepwise model. Stepwise means that we first estimate a univariate regression $\text{growth}_i = \beta_0 + \beta_1 \cdot \text{treat}_i + \epsilon_i$, and in each subsequent model, we add one control variable. 
 
@@ -95,15 +95,19 @@ We now want to estimate a stepwise model. Stepwise means that we first estimate 
 
 ```{r}
 
+model1 <- lm(growth ~ treat, data = GrowthSW)
+model2 <- update(model1, . ~ . + rgdp60)
+model3 <- update(model2, . ~ . + tradeshare)
+model4 <- update(model3, . ~ . + education)
+
 ```
 
 Now, we put the models in a list, and see what `modelsummary` gives us:
 
 ```{r}
 list(model1, model2, model3, model4) |>
-  modelsummary(stars=T,
-# edit this to remove the statistics other than R-squared
-# and N
+  modelsummary(stars=T, 
+               gof_map = c("nobs", "r.squared")
 ) 
 
 ```
@@ -112,18 +116,27 @@ list(model1, model2, model3, model4) |>
 
 **Question 3.6**: According to this analysis, what is the main driver of economic growth? Why?
 
+In our models main driver of economic growth is an education. As we can see R2 in a model with this variable is the highest, up to 32%, so variables explain our model here in the best way. Also p-value associated with "education" is less than 0.001, so this variable is most statistically significant (compared to other).
+
 **Question 3.7**: In the code chunk below, edit the table such that the cells (including standard errors) corresponding to the variable `treat` have a red background and white text. Make sure to load the `kableExtra` library beforehand.
 
 ```{r}
 library(kableExtra)
 list(model1, model2, model3, model4) |>
-  modelsummary(stars=T, gof_map = c("nobs", "r.squared")) 
-# use functions from modelsummary to edit this table
+  modelsummary(stars=T, gof_map = c("nobs", "r.squared")) |>
+  kable_styling() |>
+  column_spec(column = 2, background = "red", color = "white")
+  
+
 ```
 
 **Question 3.8**: Write a piece of code that exports this table (without the formatting) to a Word document. 
 
 ```{r}
+list(model1, model2, model3, model4) |>
+  modelsummary(stars=T, title = "Regression table", 
+  gof_map=c("nobs", "adj.r.squared"),
+  output = 'regression_table.docx')
 
 ```
 
