@@ -62,7 +62,7 @@ datasummary(growth + rgdp60 ~ treat*(Mean + Median + SD + Min + Max), data = Gro
 
 **Designated place**: type one or two sentences describing this table of a fellow student below. For example, comment on the mean and median growth of both groups. Then stage, commit and push it to their github repository. 
 
-
+This table compares two groups, "more than 0 revolutions" and "revolutions equal to 0," based on their growth and real GDP per capita in 1960. The "more than 0 revolutions" group has a lower mean growth (1.68) and median growth (1.92) compared to the "revolutions equal to 0" group with a higher mean growth (2.46) and median growth (2.29).
 
 ### Part 3: Make a table summarizing reressions using modelsummary and kable
 
