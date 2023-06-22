@@ -52,7 +52,8 @@ One of the variables in the dataset is `revolutions`, the number of revolutions,
 ```{r}
 library(modelsummary); library(tidyverse)
 
-GrowthSW$treat <- ifelse(GrowthSW$revolutions == 0, "Revolutions equal to 0", "More than 0 revolutions")
+GrowthSW$treat <- ifelse(GrowthSW$revolutions == 0, 
+                         "Revolutions equal to 0", "More than 0 revolutions")
 
 datasummary(growth + rgdp60 ~ treat*(Mean + Median + SD + Min + Max), data = GrowthSW)
 
@@ -125,7 +126,7 @@ library(kableExtra)
 list(model1, model2, model3, model4) |>
   modelsummary(stars=T, gof_map = c("nobs", "r.squared")) |>
   kable_styling() |>
-  column_spec(column = 2, background = "red", color = "white")
+  row_spec(row = 3:4, background = "red", color = "white")
   
 
 ```
